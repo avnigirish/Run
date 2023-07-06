@@ -10,10 +10,10 @@ public class MoveSphere : MonoBehaviour
     bool ground1;
     bool ground2;
     bool invert;
-    bool once;
     bool isRotated;
     int count;
     Animation anim;
+    AudioSource audio;
 
     // Start is called before the first frame update
     void Start()
@@ -23,6 +23,7 @@ public class MoveSphere : MonoBehaviour
         mainCamera = Camera.main;
         mainCamera.enabled = true;
         anim = mainCamera.GetComponent<Animation>();
+        audio = GetComponent<AudioSource>();
         ground1 = true;
         ground2 = false;
         invert = false;
@@ -38,8 +39,13 @@ public class MoveSphere : MonoBehaviour
 
         if (transform.position.y <= 1 && transform.position.y >= 0.9)
             ground1 = true;
+        else
+            ground1 = false;
+
         if (transform.position.y <= 9 && transform.position.y >= 8.9)
             ground2 = true;
+        else
+            ground2 = false;
 
         if (transform.position.y < -10 || transform.position.y > 20) { 
             if(invert)
@@ -59,6 +65,7 @@ public class MoveSphere : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            audio.Play();
             if (ground1)
             {
                 rb.AddForce(Vector3.up * 50f * 10);
@@ -72,25 +79,19 @@ public class MoveSphere : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            once = false;
+            audio.Play();
+            if (!ground1 && !ground2)
+                return;
+
             count++;
-            if (!invert)
-            {
-                //invert = true;
-                once = true;
-                isRotated = false;
-            }
-            else
-            {
-                once = false;
-                //invert = false;
-                isRotated = false;
-            }
-            invert = true;
-            if (invert)
-                Physics.gravity = -1 * Physics.gravity;
-            else
-                Physics.gravity = -1 * Physics.gravity;
+
+            if (!invert && (ground1 || ground2) && count>0)
+                invert = true;
+            else if(invert && (ground1 || ground2))
+                invert = false;
+
+            isRotated = false;
+            Physics.gravity = -1 * Physics.gravity;
 
         }
 
